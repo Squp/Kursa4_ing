@@ -5,82 +5,70 @@
 #include <iostream>
 #define N 4
 #define alpha 0.05
+#define BN 100000
 
 using namespace std;
 
 double X[N] = {150, 180, 165, 165};
 double Y[N] = {150, 150, 175.98, 158.67};
 double Z[N] = {150, 150, 150, 174.495};
-int buf[N] = {0, 1, 2, 3};
+double Zm[3];
 
-void selectSort(){
-  size_t size = N;
-  long i, j, k;
-  double x, y, z;
-  int bf;
-  for(int i=0; i < size; i++) {   	// i - номер текущего шага
-    k=i;
-    x=Z[i]; y = Y[i]; z = X[i]; bf = buf[i];
+int draw_face(int a, int b, int c, int z){
+    int flag = 0;
+    if(Zm[z] == BN)
+        return 0;
 
-    for(j=i+1; j < size; j++)	// цикл выбора наименьшего элемента
-      if (Z[j] < x ){
-        k=j;
-        x=Z[j];
-        y=Y[j];
-        z=Z[j];
-        bf=buf[j] ;        // k - индекс наименьшего элемента
-      }
-    Z[k] = Z[i];
-    Y[k] = Y[i];
-    X[k] = X[i];
-    buf[k] = buf[i];
-    Z[i] = x;
-    Y[i] = y;
-    X[i] = z;
-    buf[i] = bf;
-     	            // меняем местами наименьший с a[i]
-  }
-}
+    for(int i=0; i<3;){
+        if(Zm[z]==Zm[i])
+            i++;
+        else if(Zm[z]<Zm[i]){
+            flag = 1;
+            i++;
+        }
+        else
+            i++;
+    }
 
-void draw_face(int a, int b, int c){
-    line(X[a], Y[a], X[b], Y[b]);
-    line(X[b], Y[b], X[c], Y[c]);
-    line(X[c], Y[c], X[a], Y[a]);
+    if(flag==1){
+        line(X[a], Y[a], X[b], Y[b]);
+        line(X[b], Y[b], X[c], Y[c]);
+        line(X[c], Y[c], X[a], Y[a]);
+        Zm[z] = BN;
+        return 1;
+    }
+    return 0;
+
+
 }
 
 void print(){
-    draw_face(buf[0], buf[1], buf[2]);
-    draw_face(buf[0], buf[3], buf[1]);
-    draw_face(buf[1], buf[2], buf[3]);
+    int counter = 0;
+    while(1){
+        counter += draw_face(0, 1, 2, 0);
+        counter += draw_face(0, 3, 1, 1);
+        counter += draw_face(1, 2, 3, 2);
+        if(counter == 3)
+            break;
+    }
 }
 
-
-/*template<typename T>
-void selectSort(T a[], T b[], T c[], int buf[], long size) {
-  long i, j, k;
-  T x, y, z;
-  int bf;
-  for( i=0; i < size; i++) {   	// i - номер текущего шага
-    k=i;
-    x=a[i]; y = b[i]; z = c[i]; bf = buf[i];
-
-    for(j=i+1; j < size; j++)	// цикл выбора наименьшего элемента
-      if (a[j] < x ){
-        k=j;
-        x=a[j];
-        bf=buf[j] ;        // k - индекс наименьшего элемента
-      }
-    a[k] = a[i];
-    b[k] = b[i];
-    c[k] = c[i];
-    buf[k] = buf[i];
-    a[i] = x;
-    b[i] = y;
-    c[i] = z;
-    buf[i] = bf;
-     	            // меняем местами наименьший с a[i]
-  }
-}*/
+void print_coor(){
+    int i;
+    cout << endl;
+    for(i = 0; i<4; i++)
+        cout << X[i] << "\t";
+    cout << endl;
+    for(i = 0; i<4; i++)
+        cout << Y[i]<< "\t";
+    cout << endl;
+    for(i = 0; i<4; i++)
+        cout << Z[i]<< "\t";
+    cout << endl << endl;
+    for(i = 0; i<3; i++)
+        cout << Zm[i]<< "\t";
+    cout << endl << endl;
+}
 
 int main(){
     double x, y, z;
@@ -92,22 +80,12 @@ int main(){
 	initgraph(&gdriver, &gmode, "");
 	setlocale(LC_ALL, "Russian");
 	double size_f = sizeof(Z)/sizeof(Z[0]);
-    while(1){
-            selectSort();
-            cout << endl;
-            for(i = 0; i<4; i++)
-                cout << X[i] << "\t";
-            cout << endl;
-            for(i = 0; i<4; i++)
-                cout << Y[i]<< "\t";
-            cout << endl;
-            for(i = 0; i<4; i++)
-                cout << Z[i]<< "\t";
-            cout << endl << endl;
-            for(i = 0; i<4; i++)
-                cout << buf[i]<< "\t";
-            cout << endl;
 
+    while(1){
+            Zm[0]=((Z[0]+Z[1]+Z[2])/3);
+            Zm[1]=((Z[0]+Z[3]+Z[1])/3);
+            Zm[2]=((Z[1]+Z[2]+Z[3])/3);
+            print_coor();
             print();
             midx=0;
             midy=0;
@@ -187,6 +165,8 @@ int main(){
                     Z[i]=midz-k*(midz-Z[i]);
                 }
                 break;
+            case '0':
+                return 0;
             }
             cleardevice();
     }
@@ -194,4 +174,3 @@ int main(){
 	getchar();
 	return 0;
 }
-
